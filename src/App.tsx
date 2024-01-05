@@ -3,9 +3,7 @@ import NoteCard from "./components/NoteCard";
 
 const App = () => {
   const [cards, setCards] = useState<NoteCard[]>([
-    { id: "card-1", content: "Look for job" },
-    { id: "card-2", content: "Note Graphs" },
-    { id: "card-3", content: "UE5 Platformer Game to learn game dev through" },
+    { id: "card-1", content: "Click on text to edit" },
   ]);
 
   const generateId = () => `card-${Math.random().toString(36).slice(2, 9)}`;
@@ -13,6 +11,14 @@ const App = () => {
   const addCard = () => {
     const newCards = [...cards, { id: generateId(), content: "" }];
     setCards(newCards);
+  };
+
+  const handleInputChange = (id: string, newContent: string) => {
+    setCards((prevCards) =>
+      prevCards.map((card) =>
+        card.id === id ? { ...card, content: newContent } : card,
+      ),
+    );
   };
 
   return (
@@ -24,10 +30,10 @@ const App = () => {
         +
       </button>
       <div>
-            {cards.map((card) => (
-              <NoteCard content={card.content} />
-            ))}
-          </div>
+        {cards.map((card) => (
+          <NoteCard card={card} handleInputChange={handleInputChange} />
+        ))}
+      </div>
     </div>
   );
 };
