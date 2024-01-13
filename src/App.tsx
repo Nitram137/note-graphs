@@ -1,39 +1,63 @@
-import { useState } from "react";
-import NoteCard from "./components/NoteCard";
+import { useCallback } from "react";
+import ReactFlow, {
+  Connection,
+  Edge,
+  addEdge,
+  useEdgesState,
+  useNodesState,
+} from "reactflow";
+
+import "reactflow/dist/style.css";
+import TextInputNode from "./customNodes/TextInputNode";
+
+const nodeStyle =
+  "border-none bg-neutral-600 text-white shadow-sm shadow-black rounded-lg";
+
+const nodeTypes = { textInput: TextInputNode };
 
 const App = () => {
-  const [cards, setCards] = useState<NoteCard[]>([
-    { id: "card-1", content: "Click on text to edit" },
-  ]);
+  const [nodes, setNodes, onNodesChange] = useNodesState([]);
+  const [edges, setEdges, onEdgesChange] = useEdgesState([]);
 
-  const generateId = () => `card-${Math.random().toString(36).slice(2, 9)}`;
+  const onConnect = useCallback(
+    (params: Edge | Connection) => setEdges((eds) => addEdge(params, eds)),
+    [setEdges],
+  );
 
-  const addCard = () => {
-    const newCards = [...cards, { id: generateId(), content: "" }];
-    setCards(newCards);
-  };
+  const generateId = () => `${Math.random().toString(36).slice(2, 9)}`;
 
-  const handleInputChange = (id: string, newContent: string) => {
-    setCards((prevCards) =>
-      prevCards.map((card) =>
-        card.id === id ? { ...card, content: newContent } : card,
-      ),
-    );
+  const addNode = () => {
+    const newNodes = [
+      ...nodes,
+      {
+        id: generateId(),
+        type: "textInput",
+        position: { x: 0, y: 0 },
+        data: { label: "Edit text" },
+        className: nodeStyle,
+      },
+    ];
+    setNodes(newNodes);
   };
 
   return (
-    <div className="w-screen h-screen p-8 border-2 rounded-xl">
+    <div className="w-screen h-screen border-2 rounded-xl">
       <button
-        className="px-4 py-2 text-5xl rounded-full shadow shadow-black bg-neutral-600 hover:bg-neutral-500"
-        onClick={addCard}
+        className="absolute z-10 px-4 py-2 m-4 text-5xl rounded-full shadow shadow-black bg-neutral-600 hover:bg-neutral-500"
+        onClick={addNode}
       >
         +
       </button>
-      <div>
-        {cards.map((card) => (
-          <NoteCard card={card} handleInputChange={handleInputChange} />
-        ))}
-      </div>
+      <ReactFlow
+        nodes={nodes}
+        edges={edges}
+        onNodesChange={onNodesChange}
+        onEdgesChange={onEdgesChange}
+        onConnect={onConnect}
+        nodeTypes={nodeTypes}
+        fitView
+        proOptions={{ hideAttribution: true }}
+      ></ReactFlow>
     </div>
   );
 };
